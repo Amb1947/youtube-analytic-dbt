@@ -1,0 +1,100 @@
+version: 2
+
+sources:
+  - name: staging
+    database: zoomcamp-pilot-project-496903
+    schema: youtube_analytics
+    tables:
+      - name: channel_details
+      - name: channel_history_external
+
+models:
+  - name: stg_channel_details
+    description: "Staging model for YouTube channel details"
+    columns:
+      - name: channel_id
+        description: "Unique identifier for each YouTube channel"
+        tests:
+          - not_null
+          - unique
+      - name: channel_name
+        description: "Display name of the channel"
+        tests:
+          - not_null
+      - name: category
+        description: "Content category of the channel"
+
+  - name: stg_channel_history
+    description: "Staging model for YouTube channel history snapshots over time"
+    columns:
+      - name: snapshot_at
+        description: "Timestamp when the snapshot was captured"
+        tests:
+          - not_null
+      - name: channel_id
+        description: "Foreign key to stg_channel_details"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_channel_details')
+                field: channel_id
+      - name: title
+        description: "Channel or video title at snapshot time"
+      - name: published_at
+        description: "Original publish timestamp"
+      - name: view_count
+        description: "Total views at snapshot time"
+        tests:
+          - not_null
+      - name: subscriber_count
+        description: "Total subscribers at snapshot time"
+        tests:
+          - not_null
+      - name: video_count
+        description: "Total videos at snapshot time"
+        tests:
+          - not_null
+
+  - name: dim_channels
+    description: "Dimension table — one row per YouTube channel with descriptive attributes"
+    columns:
+      - name: channel_id
+        description: "Natural key for the channel"
+        tests:
+          - not_null
+          - unique
+      - name: channel_name
+        description: "Display name of the channel"
+        tests:
+          - not_null
+      - name: category
+        description: "Content category"
+
+  - name: fct_channel_metrics
+    description: "Fact table — one row per channel per snapshot with view/subscriber/video counts"
+    columns:
+      - name: channel_id
+        description: "Foreign key to dim_channels"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_channels')
+                field: channel_id
+      - name: snapshot_date
+        description: "Date of the snapshot (cast from snapshot_at timestamp)"
+        tests:
+          - not_null
+      - name: view_count
+        description: "Total views at snapshot time"
+        tests:
+          - not_null
+      - name: subscriber_count
+        description: "Total subscribers at snapshot time"
+        tests:
+          - not_null
+      - name: video_count
+        description: "Total videos at snapshot time"
+        tests:
+          - not_null
