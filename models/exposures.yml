@@ -1,0 +1,12 @@
+version: 2
+
+exposures:
+  - name: youtube_analytics_dashboard
+    type: dashboard
+    description: "Dashboard showing YouTube channel metrics and category insights."
+    depends_on:
+      - ref('facts_channel_metrics')
+      - ref('dim_channel_category')
+    owner:
+      name: "Faiz Ahmad"
+      email: "your-email@example.com"
